@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/Veoler/rest-api-coffee-server/models"
 	"net/http"
 )
 
@@ -13,6 +14,15 @@ func main() {
 			"Сообщение": "Отклик есть",
 		})
 	})
+
+	r.GET("/drinks", func(c *gin.Context) {
+		drinks, err := models.GetDrinksShort()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+		}
+
+		c.JSON(http.StatusOK, drinks)
+	});
 
 	r.Run()
 }

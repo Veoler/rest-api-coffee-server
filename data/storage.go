@@ -1,4 +1,4 @@
-package storage
+package data
 
 import (
 	"github.com/Veoler/rest-api-coffee-server/models"
@@ -6,7 +6,7 @@ import (
 )
 
 // Наше временное хранилище в памяти
-var Drinks = []drink.Drink{
+var Drinks = []models.Drink{
 	{
 		ID:				1,
 		Name:			"Эспрессо",
@@ -36,21 +36,21 @@ var Drinks = []drink.Drink{
 	},
 }
 
-func GetAll() []drink.Drink {
+func GetAll() []models.Drink {
 	return Drinks
 }
 
-func GetByID(id int) (drink.Drink, error) {
+func GetByID(id int) (models.Drink, error) {
 	for _, r := range Drinks {
 		if r.ID == id {
 			return r, nil
 		}
 	}
-	return drink.Drink{}, errors.New("напиток не найден")
+	return models.Drink{}, errors.New("напиток не найден")
 }
 
-func GetInStock() []drink.Drink {
-	var inStock []drink.Drink
+func GetInStock() []models.Drink {
+	var inStock []models.Drink
 	for _, r := range Drinks {
 		if r.InStock {
 			inStock = append(inStock, r)
@@ -59,7 +59,7 @@ func GetInStock() []drink.Drink {
 	return inStock
 }
 
-func Create(newDrink drink.Drink) drink.Drink {
+func Create(newDrink models.Drink) models.Drink {
 	NextID := 4
 	newDrink.ID = NextID
 	NextID++
@@ -77,7 +77,7 @@ func Delete(id int) error {
 	return errors.New("не удалось удалить: напиток не найден")
 }
 
-func Update(id int, updatedDrink drink.Drink) (drink.Drink, error) {
+func Update(id int, updatedDrink models.Drink) (models.Drink, error) {
 	for i, r := range Drinks {
 		if r.ID == id {
 			Drinks[i] = updatedDrink
@@ -85,5 +85,5 @@ func Update(id int, updatedDrink drink.Drink) (drink.Drink, error) {
 			return Drinks[i], nil
 		}
 	}
-	return drink.Drink{}, errors.New("не удалось обновить: напиток не найден")
+	return models.Drink{}, errors.New("не удалось обновить: напиток не найден")
 }

@@ -81,13 +81,24 @@ func Delete(id int) error {
 func Update(id int, input models.Drink) (models.Drink, error) {
 	for i := range drinks {
 		if drinks[i].ID == id {
-			// Обновляем только те поля, которые пришли в JSON (не nil)
-			if input.Name != nil { drinks[i].Name = input.Name }
-			if input.Price != nil { drinks[i].Price = input.Price }
-			if input.InStock != nil { drinks[i].InStock = input.InStock }
-			if input.IsCaffeine != nil { drinks[i].IsCaffeine = input.IsCaffeine }
-			if input.Volume != nil { drinks[i].Volume = input.Volume }
-			if input.Description != nil { drinks[i].Description = input.Description }
+			if input.Name != nil { 
+				drinks[i].Name = input.Name
+			}
+			if input.Price != nil { 
+				drinks[i].Price = input.Price 
+			}
+			if input.InStock != nil { 
+				drinks[i].InStock = input.InStock 
+			}
+			if input.IsCaffeine != nil { 
+				drinks[i].IsCaffeine = input.IsCaffeine 
+			}
+			if input.Volume != nil { 
+				drinks[i].Volume = input.Volume 
+			}
+			if input.Description != nil { 
+				drinks[i].Description = input.Description 
+			}
 			return drinks[i], nil
 		}
 	}

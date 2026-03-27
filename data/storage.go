@@ -3,87 +3,93 @@ package data
 import (
 	"errors"
 	"github.com/Veoler/rest-api-coffee-server/models"
-
 )
 
-var Drinks = []models.Drink{
+// Вспомогательные функции добавления значений в структуры с указателями
+func strPtr(s string) *string { 
+	return &s 
+}
+func intPtr(i int) *int { 
+	return &i 
+}
+func boolPtr(b bool) *bool { 
+	return &b 
+}
+
+var drinks = []models.Drink{
 	{
-		ID:				1,
-		Name:			"Эспрессо",
-		Price:			150,
-		InStock:		true,
-		IsCaffeine:		true,
-		Volume:			30,
-		Description:	"Классический крепкий кофе",
+		ID:				1, 
+		Name:			strPtr("Эспрессо"), 
+		Price:			intPtr(150), 
+		InStock:		boolPtr(true), 
+		IsCaffeine:		boolPtr(true), 
+		Volume:			intPtr(30), 
+		Description:	strPtr("Крепкий кофе"),
 	},
 	{
 		ID:				2,
-		Name:			"Черный чай",
-		Price:			100,
-		InStock:		true,
-		IsCaffeine:		false,
-		Volume:			300,
-		Description:	"Чай с пакетиком",
+		Name:			strPtr("Черный чай"),
+		Price:			intPtr(100),
+		InStock:		boolPtr(true),
+		IsCaffeine:		boolPtr(false),
+		Volume:			intPtr(300),
+		Description:	strPtr("Чай с пакетиком"),
 	},
 	{
 		ID:				3,
-		Name:			"Nute Cream",
-		Price:			370,
-		InStock:		false,
-		IsCaffeine:		true,
-		Volume:			400,
-		Description:	"Очень вкусный холодный кофе с Урбечом",
+		Name:			strPtr("Nute Cream"),
+		Price:			intPtr(370),
+		InStock:		boolPtr(false),
+		IsCaffeine:		boolPtr(true),
+		Volume:			intPtr(400),
+		Description:	strPtr("Очень вкусный холодный кофе с Урбечом"),
 	},
 }
 
-func GetAll() []models.Drink {
-	return Drinks
+var nextID = 4
+
+func GetAll() []models.Drink { 
+	return drinks 
 }
 
 func GetByID(id int) (models.Drink, error) {
-	for _, r := range Drinks {
-		if r.ID == id {
-			return r, nil
+	for _, d := range drinks {
+		if d.ID == id { 
+			return d, nil 
 		}
 	}
 	return models.Drink{}, errors.New("напиток не найден")
 }
 
-func GetInStock() []models.Drink {
-	var inStock []models.Drink
-	for _, r := range Drinks {
-		if r.InStock {
-			inStock = append(inStock, r)
-		}
-	}
-	return inStock
-}
-
-func Create(newDrink models.Drink) models.Drink {
-	NextID := 4
-	newDrink.ID = NextID
-	NextID++
-	Drinks = append(Drinks, newDrink)
-	return newDrink
+func Create(d models.Drink) models.Drink {
+	d.ID = nextID
+	nextID++
+	drinks = append(drinks, d)
+	return d
 }
 
 func Delete(id int) error {
-	for i, r := range Drinks {
-		if r.ID == id {
-			Drinks = append(Drinks[:i], Drinks[i+1:]...)
+	for i, d := range drinks {
+		if d.ID == id {
+			drinks = append(drinks[:i], drinks[i+1:]...)
 			return nil
 		}
 	}
-	return errors.New("не удалось удалить: напиток не найден")
+	return errors.New("id не найден")
 }
 
-func Update(id int, updatedDrink models.Drink) (models.Drink, error) {
-	for i, r := range Drinks {
-		if r.ID == id {
-			Drinks[i] = updatedDrink
-			Drinks[i].ID = id
-			return Drinks[i], nil
+func Update(id int, input models.Drink) (models.Drink, error) {
+	for i := range drinks {
+		if drinks[i].ID == id {
+			// Обновляем только те поля, которые пришли в JSON (не nil)
+			if input.Name != nil { drinks[i].Name = input.Name }
+			if input.Price != nil { drinks[i].Price = input.Price }
+			if input.InStock != nil { drinks[i].InStock = input.InStock }
+			if input.IsCaffeine != nil { drinks[i].IsCaffeine = input.IsCaffeine }
+			if input.Volume != nil { drinks[i].Volume = input.Volume }
+			if input.Description != nil { drinks[i].Description = input.Description }
+			return drinks[i], nil
 		}
 	}
-	return models.Drink{}, errors.New("не удалось обновить: напиток не найден")
+	return models.Drink{}, errors.New("напиток не найден")
 }

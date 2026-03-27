@@ -1,59 +1,67 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/Veoler/rest-api-coffee-server/service"
 	"net/http"
 	"strconv"
+	"github.com/gin-gonic/gin"
+	"github.com/Veoler/rest-api-coffee-server/models"
+	"github.com/Veoler/rest-api-coffee-server/data"
+	"github.com/Veoler/rest-api-coffee-server/service"
 )
 
 func main() {
 	r := gin.Default()
 
-	r.GET("/ping", func (c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"Сообщение": "Отклик есть",
-		})
+	r.GET("/drinks", func(c *gin.Context) {
+		c.JSON(http.StatusOK, service.GetList(false))
 	})
 
-	r.GET("/drinks", func(c *gin.Context) {
-		drinks, err := service.GetDrinksShort()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, err)
-		}
-
-		c.JSON(http.StatusOK, drinks)
-	});
-
 	r.GET("/drinks/in-stock", func(c *gin.Context) {
-		drinks, err := service.GetInStockShort()
-		
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, err)
-		}
-
-		c.JSON(http.StatusOK, drinks)
+		c.JSON(http.StatusOK, service.GetList(true))
 	})
 
 	r.GET("/drinks/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		idGet, err := strconv.Atoi(id)
-		
+		id, _ := strconv.Atoi(c.Param("id"))
+		drink, err := data.GetByID(id)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "неверный формат ID"})
-			return
-		}
-
-		// Вызываем сервис
-		drink, err := service.GetDrinkFull(idGet)
-		if err != nil {
-			// Если напиток не найден (репозиторий вернул ошибку)
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-
 		c.JSON(http.StatusOK, drink)
 	})
 
-	r.Run()
+	r.POST("/drinks", func(c *gin.Context) {
+		var input models.Drink
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка при добавлении: некорректные данные"})
+			return
+		}
+		c.JSON(http.StatusCreated, data.Create(input))
+	})
+
+	r.DELETE("/drinks/:id", func(c *gin.Context) {
+		id, _ := strconv.Atoi(c.Param("id"))
+		if err := data.Delete(id); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.Status(http.StatusNoContent)
+	})
+
+	r.PATCH("/drinks/:id", func(c *gin.Context) {
+		id, _ := strconv.Atoi(c.Param("id"))
+		var input models.Drink
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка при изменении"})
+			return
+		}
+		updated, err := data.Update(id, input)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, updated)
+	})
+
+	r.Run(":8080")
 }

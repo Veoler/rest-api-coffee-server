@@ -21,7 +21,12 @@ func main() {
 	})
 
 	r.GET("/drinks/:id", func(c *gin.Context) {
-		id, _ := strconv.Atoi(c.Param("id"))
+		id, errr := strconv.Atoi(c.Param("id"))
+		if errr != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "ID должен быть числом"})
+    		return
+		}
+
 		drink, err := data.GetByID(id)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -40,7 +45,12 @@ func main() {
 	})
 
 	r.DELETE("/drinks/:id", func(c *gin.Context) {
-		id, _ := strconv.Atoi(c.Param("id"))
+		id, errr := strconv.Atoi(c.Param("id"))
+		if errr != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "ID должен быть числом"})
+    		return
+		}
+
 		if err := data.Delete(id); err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
@@ -49,12 +59,18 @@ func main() {
 	})
 
 	r.PATCH("/drinks/:id", func(c *gin.Context) {
-		id, _ := strconv.Atoi(c.Param("id"))
+		id, errr := strconv.Atoi(c.Param("id"))
+		if errr != nil {
+    		c.JSON(http.StatusBadRequest, gin.H{"error": "ID должен быть числом"})
+    		return
+		}
+
 		var input models.Drink
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка при изменении"})
 			return
 		}
+		
 		updated, err := data.Update(id, input)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
